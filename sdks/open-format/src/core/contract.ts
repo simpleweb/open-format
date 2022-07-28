@@ -1,8 +1,15 @@
 import base from '@simpleweb/open-format-contracts';
 import { BigNumberish, ethers, Signer, Transaction } from 'ethers';
+import { NFTStorage } from 'nft.storage';
 import { OpenFormat } from '../contract-types';
+import { invariant } from '../helpers/invariant';
 import isZeroAddress from '../helpers/zeroAddress';
 import { NFTMetadata } from '../types';
+
+const nftStorage = new NFTStorage({
+  token:
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDVkMjJDZDg2M2Y2NUVBN0ZjZjI3MEE5MUY2NTE5Nzc4OGRhRjU4NmMiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY1OTAxMTU3OTQ2NSwibmFtZSI6Ik9wZW4gRm9ybWF0In0.v-0FkXH0IpVB_JdyG6Ho6kXPqy4DOVr_HZzsks3DES4',
+});
 
 type ContractArgs = {
   contractAddress: string;
@@ -425,10 +432,12 @@ export async function deploy({
   signer,
   nft,
   transactionArgs,
+  factory,
 }: {
   signer: Signer;
   nft: NFTMetadata;
   transactionArgs?: Transaction;
+  factory?: string;
 }) {
   const openFormatContract = new ethers.ContractFactory(
     base.abi,
@@ -436,10 +445,33 @@ export async function deploy({
     signer
   );
 
+  let url = nft.url;
+
+  if (typeof url === 'undefined' && factory) {
+    invariant(nft.description, 'A description must be set');
+    invariant(nft.image, 'An image must be set');
+    invariant(nft.releaseType, 'A release type must be set');
+
+    const customMetadata = nft.metadata ?? {};
+
+    const metadata = await nftStorage.store({
+      name: nft.name,
+      description: nft.description,
+      image: nft.image,
+      factory_id: factory,
+      release_type: nft.releaseType,
+      ...customMetadata,
+    });
+
+    url = metadata.url;
+  }
+
+  invariant(url, 'An IPFS URL must be set');
+
   const contract = await openFormatContract.deploy(
     nft.name,
     nft.symbol,
-    nft.url,
+    url,
     nft.maxSupply,
     ethers.utils.parseEther(nft.mintingPrice.toString()),
     { ...transactionArgs }

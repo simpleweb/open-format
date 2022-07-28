@@ -14,7 +14,7 @@ export type TokenProperty = {
   value: string;
 };
 
-export type ReleaseType = 'art' | 'ticket' | 'audio' | 'video';
+export type ReleaseType = 'image' | 'art' | 'ticket' | 'audio' | 'video';
 
 export type ChainConfig = {
   id: Chain;
@@ -26,8 +26,12 @@ export type ChainConfig = {
 
 export interface NFTMetadata {
   name: string;
+  description?: string;
+  image?: Blob | File;
+  releaseType?: ReleaseType;
   symbol: string;
-  url: string;
+  url?: string;
+  metadata?: Object;
   maxSupply: number;
   mintingPrice: number;
 }

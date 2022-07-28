@@ -59,6 +59,7 @@ export class OpenFormatSDK extends BaseContract {
       signer: this.signer,
       nft,
       transactionArgs,
+      factory: this.options.factory,
     });
 
     return tx;

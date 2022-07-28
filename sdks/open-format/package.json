@@ -75,6 +75,7 @@
     "@simpleweb/open-format-contracts": "^0.3.0",
     "graphql": "^16.5.0",
     "graphql-request": "^4.3.0",
-    "lodash.merge": "^4.6.2"
+    "lodash.merge": "^4.6.2",
+    "nft.storage": "^6.4.1"
   }
 }
